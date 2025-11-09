@@ -226,4 +226,8 @@ env/
 .env.local
 .env.*.local
 
-.backup
+backup/
+
+# macOS system file 匹配任意层级的子目录
+**/.DS_Store
+.DS_Store
