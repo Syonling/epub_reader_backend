@@ -1,54 +1,50 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+"""
+EPUB Reader 后端服务 - 主文件
+"""
+from app import create_app
+from config import Config
 
-app = Flask(__name__)
-CORS(app)  # 允许跨域请求
 
-@app.route('/api/analyze', methods=['POST'])
-def analyze_text():
-    """接收前端发送的文本"""
-    try:
-        data = request.get_json()
-        text = data.get('text', '')
-        
-        if not text:
-            return jsonify({'error': '文本为空'}), 400
-        
-        # 打印到控制台
-        print(f"\n{'='*50}")
-        print(f"📥 收到文本: {text}")
-        print(f"📊 文本长度: {len(text)} 字符")
-        print(f"{'='*50}\n")
-        
-        # 返回响应（后续这里可以调用你的AI API）
-        response = {
-            'status': 'success',
-            'message': f'✅ 收到！文本长度: {len(text)} 字符',
-            'received_text': text,
-            'analysis': {
-                'info': 'AI分析功能开发中...',
-                'word_count': len(text.split()),
-            }
-        }
-        
-        return jsonify(response), 200
-        
-    except Exception as e:
-        print(f"❌ 错误: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+def print_startup_info():
+    """打印启动信息"""
+    print("\n" + "="*70)
+    print("🚀 EPUB Reader 后端服务启动成功！")
+    print("="*70)
+    print(f"📡 监听地址: http://{Config.FLASK_HOST}:{Config.FLASK_PORT}")
+    print(f"🤖 AI提供商: {Config.AI_PROVIDER}")
+    print(f"🎯 当前模型: {Config.get_info()['model']}")
+    print("-"*70)
+    print("📍 可用接口:")
+    print(f"   - GET  /api/health              健康检查")
+    print(f"   - GET  /api/config              获取配置")
+    print(f"   - POST /api/analyze             智能分析（自动判断）")
+    print(f"   - POST /api/analyze/word        单词解析（强制）")
+    print(f"   - POST /api/analyze/sentence    句子分析（强制）")
+    print(f"   - POST /api/switch-provider     切换AI提供商")
+    print("-"*70)
+    print(f"💡 测试命令:")
+    print(f"   curl http://localhost:{Config.FLASK_PORT}/api/health")
+    print("="*70)
+    
+    if Config.AI_PROVIDER == 'echo':
+        print("⚠️  当前使用 Echo 测试模式")
+        print("💡 配置真实的AI API密钥以使用实际AI分析功能")
+        print("   在 .env 文件中设置相应的 API_KEY")
+        print("="*70)
+    
+    print()
 
-@app.route('/api/health', methods=['GET'])
-def health_check():
-    """健康检查接口"""
-    return jsonify({
-        'status': 'ok', 
-        'message': '✅ 后端运行正常'
-    }), 200
 
 if __name__ == '__main__':
-    print("\n" + "="*60)
-    print("🚀 后端服务启动成功！")
-    print("📡 监听地址: http://0.0.0.0:5001")
-    print("💡 测试地址: http://localhost:5001/api/health")
-    print("="*60 + "\n")
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    # 创建应用
+    app = create_app()
+    
+    # 打印启动信息
+    print_startup_info()
+    
+    # 启动服务
+    app.run(
+        host=Config.FLASK_HOST,
+        port=Config.FLASK_PORT,
+        debug=Config.FLASK_DEBUG
+    )

@@ -1,0 +1,25 @@
+# Flask 核心
+Flask==3.0.0
+flask-cors==4.0.0
+
+# 环境变量管理
+python-dotenv==1.0.0
+
+# AI API 客户端 (根据需要安装)
+# OpenAI
+openai>=1.0.0
+
+# Anthropic Claude
+anthropic>=0.18.0
+
+# Google Gemini
+google-generativeai>=0.3.0
+
+# HTTP 请求（用于 Ollama）
+requests>=2.31.0
+
+# 可选：异步支持
+aiohttp>=3.9.0
+
+# 可选：更好的日志
+colorlog>=6.8.0
