@@ -2,6 +2,7 @@
 EPUB Reader 后端服务 - 主文件
 """
 from app import create_app
+from app.services.health_monitor import start_monitoring
 from config import Config
 
 
@@ -17,10 +18,17 @@ def print_startup_info():
     print("📍 可用接口:")
     print(f"   - GET  /api/health              健康检查")
     print(f"   - GET  /api/config              获取配置")
+    print(f"   - GET  /api/providers           获取提供商列表")
+    print(f"   - GET  /api/stats               查看统计信息")
     print(f"   - POST /api/analyze             智能分析（自动判断）")
     print(f"   - POST /api/analyze/word        单词解析（强制）")
     print(f"   - POST /api/analyze/sentence    句子分析（强制）")
     print(f"   - POST /api/switch-provider     切换AI提供商")
+    print("-"*70)
+    print(f"📊 日志功能:")
+    print(f"   - 请求日志: logs/access.log")
+    print(f"   - 错误日志: logs/error.log")
+    print(f"   - 健康日志: logs/health_check.log (每30分钟)")
     print("-"*70)
     print(f"💡 测试命令:")
     print(f"   curl http://localhost:{Config.FLASK_PORT}/api/health")
@@ -38,6 +46,9 @@ def print_startup_info():
 if __name__ == '__main__':
     # 创建应用
     app = create_app()
+    
+    # 启动健康监控（每30分钟检查一次）
+    start_monitoring(interval=1800)
     
     # 打印启动信息
     print_startup_info()

@@ -9,9 +9,14 @@ def create_app():
     app = Flask(__name__)
     CORS(app)
     
+    # 初始化日志中间件
+    from app.middleware.request_logger import init_request_logger
+    init_request_logger(app)
+    
     # 注册蓝图
-    from app.routes import health, analysis
+    from app.routes import health, analysis, stats
     app.register_blueprint(health.bp)
     app.register_blueprint(analysis.bp)
+    app.register_blueprint(stats.bp)
     
     return app

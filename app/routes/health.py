@@ -31,3 +31,55 @@ def get_config():
         'available_providers': AnalyzerFactory.get_available_providers(),
         'timestamp': datetime.now().isoformat()
     }), 200
+
+
+@bp.route('/api/providers', methods=['GET'])
+def get_providers():
+    """
+    获取所有可用的AI提供商及其状态
+    """
+    current_provider = Config.AI_PROVIDER
+    
+    providers = [
+        {
+            'id': 'echo',
+            'name': 'Echo',
+            'display_name': 'Echo (测试)',
+            'requires_key': False,
+            'status': 'ready'
+        },
+        {
+            'id': 'openai',
+            'name': 'OpenAI',
+            'display_name': 'OpenAI (GPT-4)',
+            'requires_key': True,
+            'status': 'configured' if Config.OPENAI_API_KEY else 'needs_key'
+        },
+        {
+            'id': 'claude',
+            'name': 'Claude',
+            'display_name': 'Claude (Anthropic)',
+            'requires_key': True,
+            'status': 'configured' if Config.ANTHROPIC_API_KEY else 'needs_key'
+        },
+        {
+            'id': 'gemini',
+            'name': 'Gemini',
+            'display_name': 'Gemini (Google)',
+            'requires_key': True,
+            'status': 'configured' if Config.GEMINI_API_KEY else 'needs_key'
+        },
+        {
+            'id': 'ollama',
+            'name': 'Ollama',
+            'display_name': 'Ollama (本地)',
+            'requires_key': False,
+            'status': 'ready'
+        }
+    ]
+    
+    return jsonify({
+        'current': current_provider,
+        'providers': providers,
+        'timestamp': datetime.now().isoformat()
+    }), 200
