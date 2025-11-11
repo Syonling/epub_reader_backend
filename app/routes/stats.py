@@ -10,8 +10,11 @@ import os
 from datetime import datetime
 from config import Config
 from app.utils.logger import health_logger
+from flask import Blueprint, jsonify
 
+bp = Blueprint('stats', __name__)
 
+@bp.route('/api/stats', methods=['GET'])
 class HealthMonitor:
     """健康监控器"""
     
