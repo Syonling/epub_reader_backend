@@ -40,13 +40,15 @@ class HealthMonitor:
     
     def _monitor_loop(self):
         """监控循环"""
+        # 首次延迟60秒
+        time.sleep(10)
+        
         while self.running:
             try:
                 self._perform_health_check()
             except Exception as e:
                 health_logger.error(f"健康检查失败: {str(e)}")
             
-            # 等待下次检查
             time.sleep(self.interval)
     
     def _perform_health_check(self):

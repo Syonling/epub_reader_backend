@@ -44,18 +44,18 @@ def print_startup_info():
 
 
 if __name__ == '__main__':
-    # 创建应用
     app = create_app()
     
-    # 启动健康监控（每30分钟检查一次）
-    start_monitoring(interval=1800)
+    # 只在主进程启动监控（不在reloader进程）
+    import os
+    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        start_monitoring(interval=1800)
     
-    # 打印启动信息
     print_startup_info()
     
     # 启动服务
     app.run(
         host=Config.FLASK_HOST,
         port=Config.FLASK_PORT,
-        debug=Config.FLASK_DEBUG
+        debug=Config.FLASK_DEBUG    #调试自动reload开关，调试结束后一定要关闭 (.env)
     )
