@@ -43,24 +43,26 @@ def is_single_word(text: str) -> bool:
     text = text.strip()
     
     # 规则1: 非常短（1-20个字符）
-    if len(text) > 20:
+    if len(text) > 10:
         return False
+    else:
+        return True
     
     # 规则2: 不包含句子标点
-    sentence_punctuation = '。！？.!?;；、，,\n'
-    if any(p in text for p in sentence_punctuation):
-        return False
+    # sentence_punctuation = '。！？.!?;；、，,\n'
+    # if any(p in text for p in sentence_punctuation):
+    #     return False
+
+    # # 规则3: 英文单词（不包含空格）
+    # if detect_language(text) == '英文' and ' ' not in text.strip():
+    #     return True
     
-    # 规则3: 英文单词（不包含空格）
-    if detect_language(text) == '英文' and ' ' not in text.strip():
-        return True
+    # # 规则4: 日文单词（1-10个字符，没有句子结构）
+    # if detect_language(text) == '日文' and len(text) <= 10:
+    #     return True
     
-    # 规则4: 日文单词（1-10个字符，没有句子结构）
-    if detect_language(text) == '日文' and len(text) <= 10:
-        return True
-    
-    # 规则5: 中文词汇（1-6个字符）
-    if detect_language(text) == '中文' and 1 <= len(text) <= 6:
-        return True
+    # # 规则5: 中文词汇（1-6个字符）
+    # if detect_language(text) == '中文' and 1 <= len(text) <= 6:
+    #     return True
     
     return False

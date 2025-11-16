@@ -36,6 +36,10 @@ class Config:
     # Ollama 配置（本地模型）
     OLLAMA_BASE_URL = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434')
     OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'llama2')
+
+    # DeepSeek 配置
+    DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
+    DEEPSEEK_MODEL = os.getenv('DEEPSEEK_MODEL', 'deepseek-chat')
     
     # LLM 通用配置
     MAX_TOKENS = int(os.getenv('MAX_TOKENS', 1024))

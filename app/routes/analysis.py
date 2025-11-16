@@ -60,21 +60,21 @@ def analyze_text():
             'analysis': {
                 'type': result.get('analysis_type'),  # 'word' 或 'sentence'
                 'method': result.get('method'),       # 'word_parser' 或 'ai_analysis'
-                'language': result.get('language'),
+                # 'language': result.get('language'),
                 'result': result.get('result'),
                 'status': result.get('status'),
-                'stats': {
-                    'character_count': result.get('character_count'),
-                    'word_count': len(text.split()) if result.get('language') == '英文' else len(text),
-                }
+                # 'stats': {
+                #     'character_count': result.get('character_count'),
+                #     'word_count': len(text.split()) if result.get('language') == '英文' else len(text),
+                # }
             },
             'timestamp': datetime.now().isoformat()
         }
         
         # 如果使用了AI，添加AI信息
-        if result.get('method') == 'ai_analysis':
-            response['analysis']['provider'] = result.get('provider')
-            response['analysis']['model'] = result.get('model')
+        # if result.get('method') == 'ai_analysis':
+        #     response['analysis']['provider'] = result.get('provider')
+        #     response['analysis']['model'] = result.get('model')
         
         print(f"✅ 分析完成")
         print(f"📤 分析类型: {result.get('analysis_type')} | 方法: {result.get('method')}")

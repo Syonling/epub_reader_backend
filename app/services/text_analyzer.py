@@ -45,7 +45,7 @@ class TextAnalyzer:
         # 添加元数据
         result['text'] = text
         result['analysis_type'] = analysis_type
-        result['language'] = detect_language(text)
+        # result['language'] = detect_language(text)
         result['character_count'] = len(text)
         
         return result
@@ -70,10 +70,11 @@ class TextAnalyzer:
         """使用AI分析句子"""
         try:
             ai_result = analyze_text_with_ai(text)
+            print(ai_result)
             return {
                 'method': 'ai_analysis',
-                'provider': ai_result.get('provider'),
-                'model': ai_result.get('model'),
+                # 'provider': ai_result.get('provider'),
+                # 'model': ai_result.get('model'),
                 'result': ai_result.get('analysis'),
                 'status': ai_result.get('status')
             }

@@ -75,7 +75,14 @@ def get_providers():
             'display_name': 'Ollama (本地)',
             'requires_key': False,
             'status': 'ready'
-        }
+        },
+        {
+            'id': 'deepseek',  
+            'name': 'DeepSeek',
+            'display_name': 'DeepSeek',
+            'requires_key': True,
+            'status': 'configured' if Config.DEEPSEEK_API_KEY else 'needs_key'
+        },        
     ]
     
     return jsonify({
