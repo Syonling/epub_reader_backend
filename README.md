@@ -2,26 +2,28 @@
 
 日本語学習者（特に中国語ネイティブスピーカー）向けに特別に設計された、強力なEPUBリーダーバックエンドサービスです。複数のAIモデル、包括的な日本語辞書検索、動詞の活用解析をサポートしています。
 
+> 📱 Frontend：[EPUB Reader （Flutter App）](https://github.com/Syonling/epub_reader_Androidfrontend#)
+
 ![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-blue)
 ![Python](https://img.shields.io/badge/Python-3.11.0+-brightgreen)
 ![Flutter](https://img.shields.io/badge/Flutter-3.35.6-blue)
 ![Flask](https://img.shields.io/badge/Flask-3.1.2-orange)
 
-## 🎬 效果演示
+## 🎬 デモンストレーション
 
-### 单词分析 - 完整动词变形
+### 単語分析
 **Debug中**
 <!-- ![单词分析演示](assets/demos/word_analysis.gif) -->
 
-### 句子分析 - AI 驱动的语法解析
+### 長文解析 - AIによる構文解析
 **準備中**
 <!-- ![句子分析演示](assets/demos/sentence_analysis.gif) -->
 
-[日本語](#日本語ドキュメント) | [中文](#中文文档) | [English](#english-documentation)
+[日本語](#日本語) | [English](#english-documentation)
 
 ---
 
-## 日本語ドキュメント
+## 日本語
 
 ### 🌟 概要
 
@@ -38,7 +40,7 @@ EPUB リーダー用のバックエンドサービスで、日本語学習者向
 - **Google Gemini**
 - **Ollama**
 - ✅ **DeepSeek**
-- ✅ **Echo**
+- ✅ **Echo**: テストモード仮想API（デバッグ用）
 
 #### 2. 高度な日本語辞書機能
 
