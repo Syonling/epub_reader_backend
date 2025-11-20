@@ -9,15 +9,14 @@
 ![Flutter](https://img.shields.io/badge/Flutter-3.35.6-blue)
 ![Flask](https://img.shields.io/badge/Flask-3.1.2-orange)
 
-## 🎬 デモンストレーション （1120夜　更新予定）
+## 🎬 デモンストレーション
 
 ### 単語分析
 **Debug中**
 <!-- ![单词分析演示](assets/demos/word_analysis.gif) -->
 
 ### 長文解析 - AIによる構文解析
-**準備中**
-<!-- ![句子分析演示](assets/demos/sentence_analysis.gif) -->
+![句子分析演示](assets/demos/sentence_analysis.gif)
 
 [日本語](#日本語) | [English](#english-documentation)
 
@@ -57,10 +56,10 @@ EPUB リーダー用のバックエンドサービスで、日本語学習者向
 - **12 種類の活用形を完全生成**：
   ```
   辞書形          → 読む
-  ます形(丁寧体)    → 読みます
-  ない形(否定形)    → 読まない
+  ます形(丁寧体)   → 読みます
+  ない形(否定形)   → 読まない
   命令形          → 読め
-  意志形(よう形)    → 読もう
+  意志形(よう形)   → 読もう
   受身形          → 読まれる
   使役形          → 読ませる
   可能形          → 読める

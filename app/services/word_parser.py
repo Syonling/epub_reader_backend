@@ -30,7 +30,7 @@ class WordParser:
             language: 语言类型（可选）
         
         Returns:
-            统一格式的解析结果（JSON字符串）
+            统一格式的解析结果（Dict对象，不是JSON字符串！）
         """
         # 如果没有指定语言，自动检测
         if not language:
@@ -41,7 +41,7 @@ class WordParser:
             return self._parse_japanese(word)
         else:
             # 其他语言暂不支持
-            return json.dumps({
+            return {
                 "translation": f"暂不支持{language}的词典查询",
                 "grammar_points": [],
                 "vocabulary": [{
@@ -57,7 +57,7 @@ class WordParser:
                     f"⚠️ 目前仅支持日语单词分析",
                     f"💡 检测到的语言: {language}"
                 ]
-            }, ensure_ascii=False)
+            }
     
     def _detect_language(self, word: str) -> str:
         """检测语言"""
@@ -80,20 +80,20 @@ class WordParser:
         
         return '未知'
     
-    def _parse_japanese(self, word: str) -> str:
+    def _parse_japanese(self, word: str) -> Dict:
         """
-        解析日文单词（返回JSON字符串）
+        解析日文单词（返回Dict对象）
         
         使用 japanese_word_parser 进行完整分析
         """
         if self.japanese_parser:
-            # 使用完整的日语解析器
+            # 使用完整的日语解析器（返回Dict，不是JSON字符串）
             return self.japanese_parser.parse(word)
         else:
             # 降级到简单解析
             return self._parse_japanese_fallback(word)
     
-    def _parse_japanese_fallback(self, word: str) -> str:
+    def _parse_japanese_fallback(self, word: str) -> Dict:
         """
         日语解析降级方案（无词典时）
         """
@@ -117,7 +117,7 @@ class WordParser:
             ]
         }
         
-        return json.dumps(result, ensure_ascii=False)
+        return result
 
 
 # 全局单例
