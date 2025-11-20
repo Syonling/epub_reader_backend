@@ -1,6 +1,6 @@
 """
-日语单词分析器 - 生产版（无调试信息）
-支持词典查询、动词变形分析、自动还原变形词
+日语单词分析器 - 最终版
+使用字符级映射算法，简单可靠
 """
 import json
 from typing import Dict, List, Optional
@@ -11,7 +11,6 @@ class JapaneseWordParser:
     """日语单词解析器"""
     
     def __init__(self):
-        # 尝试导入依赖库
         self.jamdict = self._import_jamdict()
         self.sudachi = self._import_sudachi()
     
@@ -32,6 +31,16 @@ class JapaneseWordParser:
         except ImportError:
             print("⚠️ sudachipy 未安装，形态分析功能将受限")
             return None
+
+    def _get_full_reading(self, tokens):
+        """将所有形态素的读音拼接成完整读音（解决读音缺失问题）"""
+        readings = []
+        for t in tokens:
+            r = t.reading_form()
+            if r != "*":
+                readings.append(r)
+        full = "".join(readings)
+        return self._katakana_to_hiragana(full)
     
     def _katakana_to_hiragana(self, text: str) -> str:
         """将片假名转换为平假名"""
@@ -44,104 +53,76 @@ class JapaneseWordParser:
                 result.append(char)
         return ''.join(result)
 
-    def _generate_reading_for_kanji_only(self, surface: str, dictionary_form: str, dictionary_reading: str) -> str:
+    def _generate_complete_reading(self, surface: str, dictionary_form: str, dictionary_reading: str) -> str:
         """
-        为整个单词生成完整读音（汉字用词典读音，假名直接从surface取）
+        字符级映射算法 - 简单可靠
         
-        算法：
-        1. 找到 dictionary_form 中第一个假名的位置
-        2. 提取该位置之前的读音（词干读音）
-        3. 组合：词干读音 + surface中词干后的所有假名
-        
-        示例：
-        - 驚かされた: おどろ(词干) + かされた(surface后缀) = おどろかされた
-        - 頼まれた: たの(词干) + まれた(surface后缀) = たのまれた
+        步骤：
+        1. 遍历 dictionary_form，建立【汉字→读音】映射
+        2. 用映射替换 surface 中的汉字，假名保持原样
         """
-        # 如果相同，直接返回
+        # 快速路径
         if surface == dictionary_form:
             return dictionary_reading
         
-        # 找到 dictionary_form 中第一个假名的位置
-        first_hira_idx = -1
+        # 建立汉字到读音的映射
+        kanji_to_reading = {}
+        reading_idx = 0
+        
         for i, char in enumerate(dictionary_form):
-            if '\u3040' <= char <= '\u309f':  # 平假名
-                first_hira_idx = i
-                break
-        
-        if first_hira_idx == -1:
-            # 没有假名，全是汉字（如：読）
-            # 找 surface 中第一个假名的位置
-            first_hira_in_surface = -1
-            for i, char in enumerate(surface):
-                if '\u3040' <= char <= '\u309f':
-                    first_hira_in_surface = i
-                    break
-            
-            if first_hira_in_surface == -1:
-                # surface 也全是汉字
-                return dictionary_reading
+            if '\u4e00' <= char <= '\u9fff':  # 汉字
+                # 提取这个汉字的读音（读到下一个假名为止）
+                kanji_reading = ""
+                
+                while reading_idx < len(dictionary_reading):
+                    next_char = dictionary_reading[reading_idx]
+                    
+                    # 检查：是否遇到 dictionary_form 中后续的假名
+                    # 如果遇到，说明汉字读音结束
+                    found_kana_in_dict = False
+                    for j in range(i + 1, len(dictionary_form)):
+                        if dictionary_form[j] == next_char and ('\u3040' <= next_char <= '\u309f'):
+                            found_kana_in_dict = True
+                            break
+                    
+                    if found_kana_in_dict:
+                        break
+                    
+                    kanji_reading += next_char
+                    reading_idx += 1
+                
+                kanji_to_reading[char] = kanji_reading
             else:
-                # surface 中汉字后有假名（如：読んだ）
-                return dictionary_reading + surface[first_hira_in_surface:]
+                # 假名，在 reading 中跳过对应位置
+                if reading_idx < len(dictionary_reading) and dictionary_reading[reading_idx] == char:
+                    reading_idx += 1
         
-        # dictionary_form 中有假名（大部分情况）
-        # 找到该假名在 dictionary_reading 中的位置
-        first_hira_char = dictionary_form[first_hira_idx]
-        stem_reading_end = -1
+        # 用映射替换 surface 中的汉字
+        result = ""
+        for char in surface:
+            if '\u4e00' <= char <= '\u9fff':  # 汉字
+                result += kanji_to_reading.get(char, char)
+            else:  # 假名直接保留
+                result += char
         
-        for i, char in enumerate(dictionary_reading):
-            if char == first_hira_char:
-                stem_reading_end = i
-                break
-        
-        if stem_reading_end == -1:
-            stem_reading_end = len(dictionary_reading)
-        
-        # 词干读音（汉字部分的读音）
-        stem_reading = dictionary_reading[:stem_reading_end]
-        
-        # surface 中词干后的所有字符（包括假名变形）
-        surface_suffix = surface[first_hira_idx:]
-        
-        # 组合
-        return stem_reading + surface_suffix
+        return result
         
     def parse(self, word: str) -> Dict:
-        """
-        解析日语单词（返回统一格式）
-        
-        返回格式与 AI 分析一致：
-        {
-            "translation": "翻译",
-            "grammar_points": [],
-            "vocabulary": [],
-            "special_notes": []
-        }
-        
-        ⚠️ 注意：返回 Dict 对象，不是 JSON 字符串！
-        """
-        # 先尝试还原变形词到原型
+        """解析日语单词"""
         original_form = self._get_original_form(word)
         search_word = original_form if original_form else word
         
-        # 使用 Sudachi 进行形态分析（分析原始输入）
         morphology = self._analyze_with_sudachi(word) if self.sudachi else None
-        
-        # 使用 Jamdict 查询词典（查询原型）
         dict_results = self._lookup_dict(search_word) if self.jamdict else None
         
-        # 如果原型查不到，尝试查询原始输入
         if not dict_results and original_form:
             dict_results = self._lookup_dict(word) if self.jamdict else None
         
-        # 构建统一格式的结果
         result = self._build_unified_result(word, morphology, dict_results)
         
-        # 如果使用了原型查询，添加提示
         if original_form and original_form != word:
             result['special_notes'].insert(0, f"💡 已自动查询原型：{original_form}")
         
-        # ✅ 返回 Dict 对象，不要转成 JSON 字符串！
         return result
     
     def _get_original_form(self, word: str) -> Optional[str]:
@@ -173,17 +154,17 @@ class JapaneseWordParser:
                 return None
             
             token = tokens[0]
+            surface = "".join(t.surface() for t in tokens)   # 用全部 morphemes 生成 surface
+            dictionary_form = token.dictionary_form()
+
+            # 用新的完整读音函数
+            surface_reading = self._get_full_reading(tokens)
             pos_tags = token.part_of_speech()
-            
-            # 获取原型读音（片假名）
-            surface_reading = token.reading_form()
-            # 转换为平假名
-            surface_reading = self._katakana_to_hiragana(surface_reading)
-            
             return {
-                'surface': token.surface(),
-                'dictionary_form': token.dictionary_form(),
-                'reading': surface_reading,
+                'surface': surface,
+                'dictionary_form': dictionary_form,
+                'surface_reading': surface_reading,   # ← 添加
+                'dictionary_reading': token.reading_form(),  # ← 添加
                 'normalized_form': token.normalized_form(),
                 'pos': pos_tags,
                 'pos_type': self._classify_pos(pos_tags),
@@ -226,7 +207,6 @@ class JapaneseWordParser:
             'conjugation_type': conjugation
         }
         
-        # 判断动词类型
         if '五段' in conjugation:
             verb_info['class'] = '五段动词（一类动词）'
         elif '一段' in conjugation:
@@ -321,27 +301,25 @@ class JapaneseWordParser:
             }
         }
         
-        # 从形态分析获取信息
         if morphology:
             surface = morphology.get('surface', '')
             dictionary_form = morphology.get('dictionary_form', '')
-            dictionary_reading = morphology.get('reading', '')
+            surface_reading = morphology.get('surface_reading', '')
+
+            if surface_reading:
+                main_vocab["reading"] = surface_reading
+            else:
+                # 才使用 fallback mapping
+                dictionary_reading = morphology.get('dictionary_reading', '')
+                main_vocab["reading"] = self._generate_complete_reading(
+                    surface, dictionary_form, dictionary_reading
+                )
             
-            # ✅ 生成完整读音（汉字+假名）
-            complete_reading = self._generate_reading_for_kanji_only(
-                surface,
-                dictionary_form, 
-                dictionary_reading
-            )
-            main_vocab["reading"] = complete_reading
-            
-            # 检查是否是动词
             if morphology.get('pos_type') == 'verb':
                 verb_type = morphology.get('verb_type')
                 if verb_type and isinstance(verb_type, dict):
                     main_vocab["conjugation"] = self._build_verb_conjugation(morphology)
         
-        # 从词典获取释义
         if dict_results:
             first_entry = dict_results[0]
             
@@ -355,32 +333,110 @@ class JapaneseWordParser:
         vocab_list.append(main_vocab)
         return vocab_list
     
+    def _detect_verb_form_by_ending(self, surface: str, dictionary_form: str, pos_tags: List[str]) -> Optional[str]:
+        """
+        高精度动词变形判断（最终版）
+        surface: 实际看到的形（驚かされた、食べられる等）
+        dictionary_form: 原型（驚かす、食べる等）
+        pos_tags: Sudachi 给的词性列表
+        """
+
+        # —— 1. 使役被动形（させられる 系）——
+        if surface.endswith("させられた"):
+            return "使役被动形-过去"
+        if surface.endswith("させられて"):
+            return "使役被动形-て形"
+        if surface.endswith("させられる"):
+            return "使役被动形"
+
+        # —— 2. 纯使役形（させる 系）——
+        if surface.endswith("させた"):
+            return "使役形-过去"
+        if surface.endswith("させて"):
+            return "使役形-て形"
+        if surface.endswith("させる"):
+            return "使役形"
+
+        # —— 3. られる：可能 or 被动 —— 
+        if surface.endswith("られた"):
+            return "被动形-过去"
+        if surface.endswith("られて"):
+            return "被动形-て形"
+        if surface.endswith("られる"):
+            # 如果是典型一段动词，优先判为可能形
+            if self._is_ichidan(dictionary_form):
+                return "可能形"
+            return "被动形"
+
+        # —— 4. 枯れる / 見える 等「本来就以 れる 结尾的一段动词」——
+        if surface == dictionary_form and dictionary_form.endswith("れる"):
+            if self._is_ichidan(dictionary_form):
+                return "原型（一段动词）"
+
+        # —— 5. 一般被动形（受身形）——
+        if surface.endswith("れた"):
+            return "被动形-过去"
+        if surface.endswith("れて"):
+            return "被动形-て形"
+        if surface.endswith("れる"):
+            return "被动形"
+
+        # —— 6. 否定形 —— 
+        if surface.endswith("なかった"):
+            return "否定形-过去"
+        if surface.endswith("なくて"):
+            return "否定形-て形"
+        if surface.endswith("ない"):
+            return "否定形"
+
+        # —— 7. 敬体 ——  
+        if surface.endswith("ませんでした"):
+            return "否定形-过去"
+        if surface.endswith("ました"):
+            return "敬体过去形"
+        if surface.endswith("ます"):
+            return "敬体形"
+
+        return None
+
+    def _is_ichidan(self, dictionary_form: str) -> bool:
+        """
+        判断是否为一段动词（非常可靠）
+        一段动词规律：假名词干 + る（前一个平假名是 い段 或 え段）
+        例：食べる、見る、寝る、枯れる
+        """
+        if not dictionary_form.endswith("る"):
+            return False
+
+        if len(dictionary_form) < 2:
+            return False
+
+        prev_char = dictionary_form[-2]
+
+        # 平假名的「い段 + え段」
+        i_e_dan = "いきしちにひみりえけせてねへめれ"
+        return prev_char in i_e_dan
+    
     def _build_verb_conjugation(self, morphology: Dict) -> Dict:
         """构建动词活用信息"""
         verb_type_info = morphology.get('verb_type', {})
-        
+
         if not verb_type_info or not isinstance(verb_type_info, dict):
             return {"has_conjugation": False}
-        
+
         dictionary_form = morphology.get('dictionary_form', '')
         surface_form = morphology.get('surface', '')
+        pos_tags = morphology.get('pos') or []
         current_form = morphology.get('verb_form', '終止形-一般')
 
-        # ✅ 检测被动形和使役形（优先检测，因为 Sudachi 可能识别错误）
-        if 'れる' in surface_form or 'られる' in surface_form:
-            if surface_form.endswith('た'):
-                current_form = '被动形-过去'
-            elif surface_form.endswith('て'):
-                current_form = '被动形-て形'
-            else:
-                current_form = '被动形'
-        elif 'せる' in surface_form or 'させる' in surface_form:
-            if surface_form.endswith('た'):
-                current_form = '使役形-过去'
-            elif surface_form.endswith('て'):
-                current_form = '使役形-て形'
-            else:
-                current_form = '使役形'
+        # ✅ 使用新的 3 参数版本结尾判断函数
+        detected_form = self._detect_verb_form_by_ending(
+            surface_form,
+            dictionary_form,
+            pos_tags,
+        )
+        if detected_form:
+            current_form = detected_form
 
         conjugation = {
             "has_conjugation": True,
@@ -392,15 +448,15 @@ class JapaneseWordParser:
             "transitivity": self._translate_transitivity(verb_type_info.get('transitivity', ''))
         }
 
-        # ✅ 生成所有活用形
+        # 生成所有活用形（如果你已经有 verb_conjugator 就会用上，没有也不会崩）
         try:
             from app.services.verb_conjugator import get_verb_conjugator
             conjugator = get_verb_conjugator()
             all_forms = conjugator.conjugate(dictionary_form, verb_type_info.get('class', ''))
             conjugation['all_forms'] = all_forms
-        except Exception as e:
+        except Exception:
             pass
-        
+
         return conjugation
     
     def _translate_verb_form(self, form: str) -> str:
@@ -419,6 +475,9 @@ class JapaneseWordParser:
             '使役形': '使役形',
             '使役形-过去': '使役形的过去式',
             '使役形-て形': '使役形的て形',
+            '否定形': '否定形（ない形）',
+            '否定形-过去': '否定形的过去式',
+            '否定形-て形': '否定形的て形',
         }
         return form_map.get(form, form)
     
@@ -433,11 +492,14 @@ class JapaneseWordParser:
             '未然形-一般': '未然形，用于接续否定助词ない等',
             '連体形-一般': '连体形，用于修饰名词',
             '被动形': '被动形，表示被动语态',
-            '被动形-过去': '被动形的过去式（如：驚かされた）',
-            '被动形-て形': '被动形的て形（如：驚かされて）',
+            '被动形-过去': '被动形的过去式',
+            '被动形-て形': '被动形的て形',
             '使役形': '使役形，表示让/使某人做某事',
             '使役形-过去': '使役形的过去式',
             '使役形-て形': '使役形的て形',
+            '否定形': '否定形，表示否定',
+            '否定形-过去': '否定形的过去式',
+            '否定形-て形': '否定形的て形',
         }
         return explanations.get(form, '具体用法请参考语法书')
     

@@ -2,7 +2,7 @@
 
 日本語学習者（特に中国語ネイティブスピーカー）向けに特別に設計された、強力なEPUBリーダーバックエンドサービスです。複数のAIモデル、包括的な日本語辞書検索、動詞の活用解析をサポートしています。
 
-> 📱 Frontend：[EPUB Reader （Flutter App）](https://github.com/Syonling/epub_reader_Androidfrontend#)
+> 📱 Frontend：[EPUB Reader （Flutter App）](https://github.com/Syonling/epub_reader_Androidfrontend)
 
 ![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-blue)
 ![Python](https://img.shields.io/badge/Python-3.11.0+-brightgreen)
@@ -13,10 +13,14 @@
 
 ### 単語分析
 **Debug中**
-<!-- ![单词分析演示](assets/demos/word_analysis.gif) -->
+![单词分析演示](assets/demos/word_analysis.gif)
 
 ### 長文解析 - AIによる構文解析
 ![句子分析演示](assets/demos/sentence_analysis.gif)
+
+### スイッチAPI
+![切换模型演示](assets/demos/switch_model.gif)
+
 
 [日本語](#日本語) | [English](#english-documentation)
 

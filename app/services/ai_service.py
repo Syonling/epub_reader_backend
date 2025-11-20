@@ -2,9 +2,12 @@
 AI 文本分析服务（同步版本）
 支持多种 LLM API：OpenAI, Claude, Gemini, Ollama
 """
-import json, os
+import json, os, json, requests
 from typing import Dict, Optional
 from config import Config
+from openai import OpenAI
+# import anthropic
+# import google.generativeai as genai
 
 # ================================
 # 基础分析器类
@@ -59,7 +62,6 @@ class OpenAIAnalyzer(BaseAnalyzer):
     
     def __init__(self):
         super().__init__()
-        from openai import OpenAI
         
         # 支持自定义 base_url（用于代理或兼容接口）
         client_kwargs = {'api_key': self.config.OPENAI_API_KEY}
@@ -114,12 +116,9 @@ class ClaudeAnalyzer(BaseAnalyzer):
     
     def __init__(self):
         super().__init__()
-        import anthropic
         self.client = anthropic.Anthropic(api_key=self.config.ANTHROPIC_API_KEY)
     
     def analyze(self, text: str) -> Dict:
-        import json
-        
         response = self.client.messages.create(
             model=self.config.CLAUDE_MODEL,
             max_tokens=2000,
@@ -162,13 +161,10 @@ class GeminiAnalyzer(BaseAnalyzer):
     
     def __init__(self):
         super().__init__()
-        import google.generativeai as genai
         genai.configure(api_key=self.config.GEMINI_API_KEY)
         self.model = genai.GenerativeModel(self.config.GEMINI_MODEL)
     
     def analyze(self, text: str) -> Dict:
-        import json
-        
         generation_config = {
             "temperature": 0.3,
             "max_output_tokens": 2000,
@@ -199,14 +195,10 @@ class OllamaAnalyzer(BaseAnalyzer):
     
     def __init__(self):
         super().__init__()
-        import requests
         self.base_url = self.config.OLLAMA_BASE_URL
         self.requests = requests
     
     def analyze(self, text: str) -> Dict:
-        import json
-        import requests
-        
         response = requests.post(
             f'{self.config.OLLAMA_BASE_URL}/api/generate',
             json={
@@ -241,7 +233,6 @@ class EchoAnalyzer(BaseAnalyzer):
         analysis_json = self._generate_japanese_mock(text)
         
         # 转换为 JSON 字符串（与 DeepSeek 格式一致）
-        import json
         return {
             'provider': 'echo',
             'model': 'echo (测试模式)',
@@ -310,7 +301,6 @@ class DeepSeekAnalyzer(BaseAnalyzer):
     def __init__(self):
         super().__init__()
         # DeepSeek 使用 OpenAI 兼容接口
-        from openai import OpenAI
         
         self.client = OpenAI(
             api_key=self.config.DEEPSEEK_API_KEY,

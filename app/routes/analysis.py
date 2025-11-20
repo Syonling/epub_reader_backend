@@ -6,6 +6,7 @@ from datetime import datetime
 from app.services.text_analyzer import get_text_analyzer
 from app.services.ai_service import AnalyzerFactory
 from config import Config
+import traceback
 
 bp = Blueprint('analysis', __name__)
 
@@ -34,12 +35,12 @@ def analyze_text():
         
         # 打印接收信息
         print(f"\n{'='*60}")
-        print(f"📥 收到分析请求")
-        print(f"📝 文本: {text[:100]}{'...' if len(text) > 100 else ''}")
-        print(f"📊 长度: {len(text)} 字符")
+        print(f" 收到分析请求")
+        print(f" 文本: {text[:100]}{'...' if len(text) > 100 else ''}")
+        print(f" 长度: {len(text)} 字符")
         if force_type:
             print(f"🎯 强制类型: {force_type}")
-        print(f"🕐 时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f" 时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"{'='*60}")
         
         # 分析文本
@@ -48,7 +49,7 @@ def analyze_text():
         
         # 检查分析是否成功
         if result.get('status') == 'error':
-            print(f"❌ 分析失败: {result.get('error')}")
+            print(f" 分析失败: {result.get('error')}")
             return jsonify({
                 'error': f"分析失败: {result.get('error')}",
                 'timestamp': datetime.now().isoformat()
@@ -76,15 +77,14 @@ def analyze_text():
         #     response['analysis']['provider'] = result.get('provider')
         #     response['analysis']['model'] = result.get('model')
         
-        print(f"✅ 分析完成")
-        print(f"📤 分析类型: {result.get('analysis_type')} | 方法: {result.get('method')}")
+        print(f" 分析完成")
+        print(f" 分析类型: {result.get('analysis_type')} | 方法: {result.get('method')}")
         print(f"{'='*60}\n")
         
         return jsonify(response), 200
         
     except Exception as e:
-        print(f"❌ 服务器错误: {str(e)}")
-        import traceback
+        print(f" 服务器错误: {str(e)}")
         traceback.print_exc()
         
         return jsonify({
@@ -113,7 +113,7 @@ def analyze_word():
                 'timestamp': datetime.now().isoformat()
             }), 400
         
-        print(f"\n📚 收到单词解析请求: {text}")
+        print(f"\n 收到单词解析请求: {text}")
         
         # 强制使用单词解析
         analyzer = get_text_analyzer()
@@ -131,12 +131,12 @@ def analyze_word():
             'timestamp': datetime.now().isoformat()
         }
         
-        print(f"✅ 单词解析完成\n")
+        print(f" 单词解析完成\n")
         
         return jsonify(response), 200
         
     except Exception as e:
-        print(f"❌ 错误: {str(e)}")
+        print(f" 错误: {str(e)}")
         return jsonify({
             'error': f'错误: {str(e)}',
             'timestamp': datetime.now().isoformat()
@@ -163,7 +163,7 @@ def analyze_sentence():
                 'timestamp': datetime.now().isoformat()
             }), 400
         
-        print(f"\n🤖 收到句子分析请求: {text[:50]}...")
+        print(f"\n 收到句子分析请求: {text[:50]}...")
         
         # 强制使用AI分析
         analyzer = get_text_analyzer()
@@ -183,7 +183,7 @@ def analyze_sentence():
             'timestamp': datetime.now().isoformat()
         }
         
-        print(f"✅ 句子分析完成\n")
+        print(f" 句子分析完成\n")
         
         return jsonify(response), 200
         
@@ -227,7 +227,7 @@ def switch_provider():
                     'note': '请检查相应的API密钥是否已设置'
                 }), 400
         
-        print(f"🔄 已切换到: {new_provider}")
+        print(f" 已切换到: {new_provider}")
         
         return jsonify({
             'message': f'已切换到 {new_provider}',

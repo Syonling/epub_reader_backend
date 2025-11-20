@@ -1,6 +1,7 @@
 """
 EPUB Reader 后端服务 - 主文件
 """
+import os
 from app import create_app
 from app.services.health_monitor import start_monitoring
 from config import Config
@@ -47,7 +48,6 @@ if __name__ == '__main__':
     app = create_app()
     
     # 只在主进程启动监控（不在reloader进程）
-    import os
     if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         start_monitoring(interval=1800)
     

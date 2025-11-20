@@ -69,13 +69,13 @@ def get_providers():
             'requires_key': True,
             'status': 'configured' if Config.GEMINI_API_KEY else 'needs_key'
         },
-        {
-            'id': 'ollama',
-            'name': 'Ollama',
-            'display_name': 'Ollama (本地)',
-            'requires_key': False,
-            'status': 'ready'
-        },
+        # {
+        #     'id': 'ollama',
+        #     'name': 'Ollama',
+        #     'display_name': 'Ollama (本地)',
+        #     'requires_key': False,
+        #     'status': 'ready'
+        # },
         {
             'id': 'deepseek',  
             'name': 'DeepSeek',
