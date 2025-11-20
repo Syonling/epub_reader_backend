@@ -3,7 +3,7 @@
 负责判断使用单词解析还是AI分析
 """
 from typing import Dict
-from app.utils.language_detector import is_single_word, detect_language
+from app.utils.language_detector import is_single_word
 from app.services.word_parser import get_word_parser
 from app.services.ai_service import analyze_text_with_ai
 

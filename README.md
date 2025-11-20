@@ -1,345 +1,480 @@
-# epub_reader_backend
+# 📚 EPUB Reader Backend
 
-一个支持多种 LLM API 的文本分析后端服务，为 Flutter EPUB 阅读器提供 AI 驱动的文本分析功能。
+日本語学習者（特に中国語ネイティブスピーカー）向けに特別に設計された、強力なEPUBリーダーバックエンドサービスです。複数のAIモデル、包括的な日本語辞書検索、動詞の活用解析をサポートしています。
 
-## 🌟 特性
+![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-blue)
+![Python](https://img.shields.io/badge/Python-3.11.0+-brightgreen)
+![Flutter](https://img.shields.io/badge/Flutter-3.35.6-blue)
+![Flask](https://img.shields.io/badge/Flask-3.1.2-orange)
 
-- ✅ 支持多种 AI 提供商（OpenAI, Claude, Gemini, Ollama）
-- ✅ Echo 测试模式（无需 API 密钥即可测试）
-- ✅ 灵活的配置管理
-- ✅ RESTful API 设计
-- ✅ CORS 支持
-- ✅ 完整的错误处理
+## 🎬 效果演示
 
-## 📦 安装步骤
+### 单词分析 - 完整动词变形
+**Debug中**
+<!-- ![单词分析演示](assets/demos/word_analysis.gif) -->
 
-### 1. 安装依赖
+### 句子分析 - AI 驱动的语法解析
+**準備中**
+<!-- ![句子分析演示](assets/demos/sentence_analysis.gif) -->
 
-```bash
-pip install -r requirements.txt
-```
-
-### 2. 配置环境变量
-
-复制 `.env.example` 到 `.env` 并配置：
-
-```bash
-cp .env.example .env
-```
-
-编辑 `.env` 文件：
-
-```env
-# 选择 AI 提供商
-AI_PROVIDER=echo  # 可选: openai, claude, gemini, ollama, echo
-
-# 如果使用 OpenAI
-OPENAI_API_KEY=your-api-key-here
-
-# 如果使用 Claude
-ANTHROPIC_API_KEY=your-api-key-here
-
-# 如果使用 Gemini
-GEMINI_API_KEY=your-api-key-here
-```
-
-### 3. 启动服务
-
-```bash
-python backend.py
-```
-
-服务将在 `http://localhost:5001` 启动。
-
-## 🚀 快速开始
-
-### Echo 测试模式（无需 API 密钥）
-
-默认配置使用 `echo` 模式，可以直接测试而无需配置真实的 API 密钥：
-
-```bash
-python backend.py
-```
-
-### 使用真实 AI API
-
-1. 在 `.env` 文件中配置 API 密钥
-2. 修改 `AI_PROVIDER` 为相应的提供商
-3. 重启服务
-
-## 📡 API 接口
-
-### 1. 健康检查
-
-```bash
-GET /api/health
-```
-
-响应：
-```json
-{
-  "status": "ok",
-  "message": "✅ 后端运行正常",
-  "config": {
-    "ai_provider": "echo",
-    "model": "echo-v1",
-    "max_tokens": 1024,
-    "temperature": 0.7
-  },
-  "available_providers": ["openai", "claude", "gemini", "ollama", "echo"],
-  "timestamp": "2025-11-09T19:00:00"
-}
-```
-
-### 2. 文本分析
-
-```bash
-POST /api/analyze
-Content-Type: application/json
-
-{
-  "text": "Hello, how are you?"
-}
-```
-
-响应：
-```json
-{
-  "original_text": "Hello, how are you?",
-  "analysis": {
-    "provider": "Echo (测试模式)",
-    "model": "echo-v1",
-    "result": {
-      "language": "英文",
-      "translation": "这是英文文本。(模拟翻译)",
-      "grammar": "文本包含 19 个字符",
-      "vocabulary": ["词汇1", "词汇2", "词汇3"],
-      "explanation": "这是一个模拟的分析结果。",
-      "note": "⚠️ 当前使用 Echo 测试模式"
-    },
-    "status": "success",
-    "stats": {
-      "character_count": 19,
-      "word_count": 4
-    }
-  },
-  "timestamp": "2025-11-09T19:00:00"
-}
-```
-
-### 3. 获取配置
-
-```bash
-GET /api/config
-```
-
-### 4. 切换 AI 提供商（可选）
-
-```bash
-POST /api/switch-provider
-Content-Type: application/json
-
-{
-  "provider": "openai"
-}
-```
-
-## 🤖 支持的 AI 提供商
-
-### 1. OpenAI (GPT-4)
-
-```env
-AI_PROVIDER=openai
-OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-4
-```
-
-获取 API 密钥：https://platform.openai.com/api-keys
-
-### 2. Anthropic Claude
-
-```env
-AI_PROVIDER=claude
-ANTHROPIC_API_KEY=sk-ant-...
-ANTHROPIC_MODEL=claude-3-sonnet-20240229
-```
-
-获取 API 密钥：https://console.anthropic.com/
-
-### 3. Google Gemini
-
-```env
-AI_PROVIDER=gemini
-GEMINI_API_KEY=...
-GEMINI_MODEL=gemini-pro
-```
-
-获取 API 密钥：https://makersuite.google.com/app/apikey
-
-### 4. Ollama (本地模型)
-
-首先安装并启动 Ollama：
-
-```bash
-# 安装 Ollama
-curl -fsSL https://ollama.com/install.sh | sh
-
-# 下载模型
-ollama pull llama2
-
-# 启动服务（默认端口 11434）
-ollama serve
-```
-
-然后配置：
-
-```env
-AI_PROVIDER=ollama
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=llama2
-```
-
-### 5. Echo (测试模式)
-
-```env
-AI_PROVIDER=echo
-```
-
-无需任何 API 密钥，返回模拟的分析结果。
-
-## 🔧 配置说明
-
-### config.py
-
-核心配置文件，管理所有环境变量和设置。
-
-### ai_service.py
-
-AI 服务模块，提供统一的文本分析接口。包含：
-- `BaseAnalyzer`: 分析器基类
-- `OpenAIAnalyzer`: OpenAI 分析器
-- `ClaudeAnalyzer`: Claude 分析器
-- `GeminiAnalyzer`: Gemini 分析器
-- `OllamaAnalyzer`: Ollama 分析器
-- `EchoAnalyzer`: 测试分析器
-- `AnalyzerFactory`: 分析器工厂
-
-### backend.py
-
-Flask 应用主文件，提供 RESTful API。
-
-## 🧪 测试
-
-### 测试健康检查
-
-```bash
-curl http://localhost:5001/api/health
-```
-
-### 测试文本分析
-
-```bash
-curl -X POST http://localhost:5001/api/analyze \
-  -H "Content-Type: application/json" \
-  -d '{"text": "今天天气真好。"}'
-```
-
-### Python 测试脚本
-
-```python
-import requests
-
-# 测试分析
-response = requests.post(
-    'http://localhost:5001/api/analyze',
-    json={'text': 'Hello, how are you?'}
-)
-
-print(response.json())
-```
-
-## 📝 前端集成
-
-Flutter 前端已经配置好相应的接口，只需确保：
-
-1. `env.dart` 中的 `backendUrl` 指向后端地址
-2. 后端服务正在运行
-3. 网络连接正常
-
-前端代码示例（已提供）：
-
-```dart
-// services/api_service.dart
-final response = await http.post(
-  url,
-  headers: {'Content-Type': 'application/json'},
-  body: jsonEncode({'text': selectedText}),
-);
-```
-
-## 🐛 故障排除
-
-### 问题：无法连接到后端
-
-- 检查后端服务是否在运行
-- 检查 Flutter 的 `env.dart` 中的 URL 配置
-- 如果使用模拟器，确保使用正确的 IP 地址：
-  - Android: `http://10.0.2.2:5001`
-  - iOS: `http://localhost:5001`
-  - 真机: `http://你的电脑IP:5001`
-
-### 问题：AI API 调用失败
-
-- 检查 `.env` 中的 API 密钥是否正确
-- 检查网络连接
-- 查看后端控制台的错误信息
-- 先使用 `echo` 模式测试基本功能
-
-### 问题：返回格式不正确
-
-- 确保前端的 `AnalysisResult` 模型与后端返回的 JSON 格式匹配
-- 查看后端控制台的输出日志
-
-## 📚 扩展开发
-
-### 添加新的 AI 提供商
-
-1. 在 `ai_service.py` 中创建新的分析器类：
-
-```python
-class NewAIAnalyzer(BaseAnalyzer):
-    async def analyze(self, text: str) -> Dict:
-        # 实现分析逻辑
-        pass
-```
-
-2. 在 `AnalyzerFactory` 中注册：
-
-```python
-_analyzers = {
-    'newai': NewAIAnalyzer,
-    # ...
-}
-```
-
-3. 在 `config.py` 中添加配置。
-
-### 自定义提示词
-
-修改 `ai_service.py` 中的 `_build_prompt` 方法来自定义 AI 提示词。
-
-## 📄 许可证
-
-本项目采用 CC BY-NC 4.0 许可证。
-
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-## 📞 联系方式
-
-如有问题或建议，欢迎联系。
+[日本語](#日本語ドキュメント) | [中文](#中文文档) | [English](#english-documentation)
 
 ---
 
-**Happy Coding! 🎉**
+## 日本語ドキュメント
+
+### 🌟 概要
+
+EPUB リーダー用のバックエンドサービスで、日本語学習者向けに特化した高度な機能を提供します。複数の AI モデルに対応し、包括的な日本語辞書検索と動詞活用分析を実現しています。
+
+### ✨ 主な機能
+
+#### 1. マルチ AI モデル対応
+
+以下の主要な AI サービスとシームレスに統合：
+
+- **OpenAI**
+- **Anthropic Claude**
+- **Google Gemini**
+- **Ollama**
+- ✅ **DeepSeek**
+- ✅ **Echo**
+
+#### 2. 高度な日本語辞書機能
+
+**辞書データベース：**
+- Jim Breen 氏の JMdict（日本語多言語辞典）を採用
+- 18 万語以上の包括的な語彙カバレッジ
+- 読み仮名、品詞、語義を含む詳細な語彙情報
+
+**動詞活用分析：**
+
+本システムは日本語動詞の活用を自動的に識別し、生成します：
+
+- **動詞分類の自動判定**：五段活用（一類）、一段活用（二類）、サ行変格活用、カ行変格活用
+- **12 種類の活用形を完全生成**：
+  ```
+  辞書形          → 読む
+  ます形(丁寧体)   → 読みます
+  ない形(否定形)   → 読まない
+  命令形          → 読め
+  意志形(よう形)   → 読もう
+  受身形          → 読まれる
+  使役形          → 読ませる
+  可能形          → 読める
+  ば形(仮定形)     → 読めば
+  て形(接続形)     → 読んで
+  た形(過去形)     → 読んだ
+  なかった形       → 読まなかった
+  使役受身形       → 読ませられる
+  ```
+
+- **促音便・撥音便などの音便規則にも対応**
+
+#### 3. インテリジェント・テキスト分析
+
+**自動判定システム：**
+- 短文（1〜10文字）→ 単語分析モード
+- 長文（10文字以上）→ 文章・段落分析モード
+
+**分析内容：**
+- 翻訳
+- 文法ポイントの解説
+- JLPT レベル付き語彙リスト
+- 動詞活用情報
+- 特別なヒント：古い日本語など
+
+### 🚀 セットアップ
+
+#### インストール
+
+```bash
+# リポジトリをクローン
+git clone < git@github.com:Syonling/epub_reader_backend.git >
+cd epub_reader_backend
+
+# Poetry を使用して依赖関係をインストール
+poetry install
+```
+
+#### 設定
+
+`.env` ファイルを作成：
+
+```python
+FLASK_HOST=0.0.0.0
+FLASK_PORT=5001
+FLASK_DEBUG=True 
+
+# 少なくとも 1 つの API を設定してください
+AI_PROVIDER=echo  #デフォルトモデルを設定する
+# OpenAI
+OPENAI_API_KEY=
+OPENAI_MODEL=
+# DeepSeek
+DEEPSEEK_API_KEY=
+DEEPSEEK_MODEL=
+# Claude
+
+# LLM 通用配置
+MAX_TOKENS=1024
+TEMPERATURE=0.7
+TIMEOUT=30
+```
+
+#### 起動
+
+```bash
+# バックエンドサーバーを起動
+poetry run python backend.py
+
+# デフォルトで http://localhost:5001 で実行されます
+```
+
+### 🔧 API エンドポイント
+
+#### `/api/analyze` - テキスト分析
+
+**リクエスト：**
+```json
+{
+  "text": "読む",
+  "provider": "openai",
+  "model": "gpt-4",  
+}
+```
+
+**レスポンス例（単語分析）：**
+```json
+{
+  "analysis": {
+    "method": "word_parser",
+    "result": {
+      "translation": "read; peruse",
+      "vocabulary": [{
+        "word": "読む",
+        "reading": "よむ",
+        "meaning": "read; peruse",
+        "level": "N2",
+        "conjugation": {
+          "has_conjugation": true,
+          "verb_class": "五段動詞（一類動詞）",
+          "all_forms": {
+            "masu_form": "読みます",
+            "te_form": "読んで",
+            "ta_form": "読んだ",
+            // ... その他の活用形
+          }
+        }
+      }],
+      "special_notes": [
+        "✅ JMdict 完全辞書を使用（XML 直接解析）"
+      ]
+    }
+  }
+}
+```
+
+**レスポンス例（文章分析）：**
+```json
+{
+  "analysis": {
+    "method": "ai_analysis",
+    "provider": "openai",
+    "model": "gpt-4",
+    "result": {
+      "translation": "我每天都在学习日语。",
+      "grammar_points": [
+        {
+          "pattern": "〜ています",
+          "explanation": "表示动作的持续进行或习惯性动作",
+          "example_in_sentence": "勉強しています",
+          "level": "N5"
+        }
+      ],
+      "vocabulary": [
+        {
+          "word": "毎日",
+          "reading": "まいにち",
+          "meaning": "每天",
+          "level": "N5"
+        },
+        {
+          "word": "勉強",
+          "reading": "べんきょう",
+          "meaning": "学习",
+          "level": "N5"
+        }
+      ],
+      "special_notes": [
+        "这是一个表达日常习惯的句子"
+      ]
+    }
+  }
+}
+```
+
+#### `/api/health` - ヘルスチェック
+
+バックエンドのステータスと利用可能な AI プロバイダーを返します。
+
+### 🎯 技術スタック
+
+- **バックエンドフレームワーク**：Flask 3.1.2
+- **依存関係管理**：Poetry
+- **日本語辞書**：JMdict（XML 直接解析）
+- **AI 統合**：
+  - OpenAI Python SDK
+  - Anthropic Python SDK
+  - Google Generative AI SDK
+  - Ollama Python SDK
+  - カスタム DeepSeek アダプター
+
+### 📁 プロジェクト構造
+
+```
+epub_reader_backend/
+├── app/
+│   ├── middleware/          # ミドルウェア（リクエストロギング等）
+│   ├── routes/              # API ルート
+│   │   ├── analysis.py      # テキスト分析エンドポイント
+│   │   ├── health.py        # ヘルスチェック
+│   │   └── stats.py         # 統計情報
+│   ├── services/            # コアサービス
+│   │   ├── ai_service.py           # AI サービス管理
+│   │   ├── japanese_word_parser.py # 日本語辞書解析
+│   │   ├── verb_conjugator.py      # 動詞活用生成
+│   │   ├── word_parser.py          # 単語解析器
+│   │   └── text_analyzer.py        # テキスト分析器
+│   └── utils/               # ユーティリティ関数
+├── backend.py               # メインエントリーポイント
+├── config.py                # 設定管理
+└── pyproject.toml           # 依存関係定義
+```
+
+### 💡 技術的特徴
+
+#### 学習者中心の設計
+
+日本語学習者、特に中国語母語話者の実際のニーズを考慮した設計：
+
+- **動詞活用の重点化**：日本語文法規則に基づいた独自の活用生成ロジックを実装。促音便、撥音便などの音便規則にも対応し、正確な活用形を生成します。
+- **文法解析の最適化**：学習段階に応じた JLPT レベル表示と、詳細な文法ポイント解説を提供。
+- **インテリジェント判定**：テキストの長さに基づいて単語分析と文章分析を自動選択。
+
+#### コスト効率の高い設計
+
+- **API 呼び出しの最適化**：単語分析はローカル辞書で処理し、AI API を使用しないため、コストを大幅に削減。
+- **選択的 AI 利用**：文章や段落の分析時のみ AI API を呼び出し、不要な API 使用を回避。
+- **複数プロバイダー対応**：ニーズに応じて最適な AI サービスを選択可能。
+
+### 📄 ライセンス
+
+CC BY-NC 4.0（非商用利用）
+
+---
+
+## English Documentation
+
+### 🌟 Overview
+
+A powerful backend service for an EPUB reader application, specifically designed for Japanese language learners. Supports multiple AI models, comprehensive Japanese dictionary lookups, and verb conjugation analysis.
+
+### ✨ Key Features
+
+#### 1. Multi-AI Model Support
+
+Seamlessly integrated with major AI services:
+
+- **OpenAI**: GPT-4, GPT-3.5, and other cutting-edge models
+- **Anthropic Claude**: High-performance models including Claude 3.5 Sonnet
+- **Google Gemini**: Gemini Pro, Gemini Flash
+- **Ollama**: Privacy-focused local deployment
+- **DeepSeek**: Cost-effective alternative
+
+#### 2. Advanced Japanese Dictionary
+
+**Dictionary Database:**
+- Powered by Jim Breen's JMdict (Japanese-Multilingual Dictionary)
+- 180,000+ comprehensive vocabulary coverage
+- Custom implementation with direct XML parsing for fast and stable performance
+- Detailed lexical information including readings, parts of speech, and definitions
+
+**Verb Conjugation Analysis:**
+
+The system automatically identifies and generates Japanese verb conjugations:
+
+- **Automatic Verb Classification**: Godan (Type I), Ichidan (Type II), Suru-irregular, Kuru-irregular
+- **12 Complete Conjugation Forms**:
+  ```
+  Dictionary Form        → 読む (yomu)
+  Masu Form (polite)     → 読みます (yomimasu)
+  Te Form (connective)   → 読んで (yonde)
+  Ta Form (past)         → 読んだ (yonda)
+  Nai Form (negative)    → 読まない (yomanai)
+  Nakatta Form           → 読まなかった (yomanakatta)
+  Ba Form (conditional)  → 読めば (yomeba)
+  Command Form           → 読め (yome)
+  Volitional Form        → 読もう (yomou)
+  Passive Form           → 読まれる (yomareru)
+  Causative Form         → 読ませる (yomaseru)
+  Potential Form         → 読める (yomeru)
+  Causative-Passive      → 読ませられる (yomaserareru)
+  ```
+
+- **Supports euphonic changes** (sound shifts in conjugation)
+
+#### 3. Intelligent Text Analysis
+
+**Automatic Detection:**
+- Short text (1-3 characters) → Word analysis mode
+- Long text (4+ characters) → Sentence/paragraph analysis mode
+
+**Analysis Content:**
+- Translation
+- Grammar point explanations
+- Vocabulary list with JLPT levels
+- Verb conjugation information
+- Learning tips
+
+### 🚀 Setup
+
+#### Installation
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd epub_reader_backend
+
+# Install dependencies using Poetry
+poetry install
+
+# Download dictionary data (about 23MB, takes a few minutes)
+poetry run python setup_dict.py
+```
+
+#### Configuration
+
+Create a `.env` file:
+
+```env
+# Configure at least one API
+OPENAI_API_KEY=sk-xxx
+ANTHROPIC_API_KEY=sk-ant-xxx
+GEMINI_API_KEY=xxx
+DEEPSEEK_API_KEY=sk-xxx
+
+# For local Ollama usage
+OLLAMA_BASE_URL=http://localhost:11434
+```
+
+#### Running
+
+```bash
+# Start the backend server
+poetry run python backend.py
+
+# Runs on http://localhost:5001 by default
+```
+
+### 🔧 API Endpoints
+
+#### `/api/analyze` - Text Analysis
+
+**Request:**
+```json
+{
+  "text": "読む",
+  "provider": "openai",
+  "model": "gpt-4",
+  "force_type": "word"  // Optional: force word or sentence analysis
+}
+```
+
+**Response Example (Word Analysis):**
+```json
+{
+  "analysis": {
+    "method": "word_parser",
+    "result": {
+      "translation": "read; peruse",
+      "vocabulary": [{
+        "word": "読む",
+        "reading": "よむ",
+        "meaning": "read; peruse",
+        "level": "N2",
+        "conjugation": {
+          "has_conjugation": true,
+          "verb_class": "Godan Verb (Type I)",
+          "all_forms": {
+            "masu_form": "読みます",
+            "te_form": "読んで",
+            "ta_form": "読んだ",
+            // ... more conjugations
+          }
+        }
+      }],
+      "special_notes": [
+        "✅ Using complete JMdict dictionary (direct XML parsing)"
+      ]
+    }
+  }
+}
+```
+
+#### `/api/health` - Health Check
+
+Returns backend status and available AI providers.
+
+### 🎯 Tech Stack
+
+- **Backend Framework**: Flask 3.1.2
+- **Dependency Management**: Poetry
+- **Japanese Dictionary**: JMdict (direct XML parsing)
+- **AI Integration**:
+  - OpenAI Python SDK
+  - Anthropic Python SDK
+  - Google Generative AI SDK
+  - Ollama Python SDK
+  - Custom DeepSeek adapter
+
+### 📁 Project Structure
+
+```
+epub_reader_backend/
+├── app/
+│   ├── middleware/          # Middleware (request logging, etc.)
+│   ├── routes/              # API routes
+│   │   ├── analysis.py      # Text analysis endpoint
+│   │   ├── health.py        # Health check
+│   │   └── stats.py         # Statistics
+│   ├── services/            # Core services
+│   │   ├── ai_service.py           # AI service management
+│   │   ├── japanese_word_parser.py # Japanese dictionary parser
+│   │   ├── verb_conjugator.py      # Verb conjugation generator
+│   │   ├── word_parser.py          # Word parser
+│   │   └── text_analyzer.py        # Text analyzer
+│   └── utils/               # Utility functions
+├── backend.py               # Main entry point
+├── config.py                # Configuration management
+└── pyproject.toml           # Dependency definitions
+```
+
+### 💡 Technical Highlights
+
+#### Direct XML Parsing for JMdict
+
+To avoid issues with traditional SQLite import (UNIQUE constraint errors), we implemented custom XML parsing. This provides:
+- Improved stability
+- Simplified setup
+- Fast search performance
+
+#### Verb Conjugation Implementation
+
+Custom conjugation logic based on Japanese grammar rules, with support for euphonic changes, producing accurate conjugation forms.
+
+### 📄 License
+
+CC BY-NC 4.0 (Non-Commercial Use)
+
+---

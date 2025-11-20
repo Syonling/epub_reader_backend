@@ -5,7 +5,6 @@ AI 文本分析服务（同步版本）
 import json, os
 from typing import Dict, Optional
 from config import Config
-from app.utils.language_detector import detect_language
 
 # ================================
 # 基础分析器类
